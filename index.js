@@ -30,9 +30,13 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
 	} else if (commandName === 'clrbow') {
         let currentChannel = interaction.channel;
-        await interaction.reply(
-            {content: `You are currently in ${currentChannel}`, ephemeral: true}
-        );
+        currentChannel.messages.fetch()
+            .then(messages => messages.forEach(msg => {
+                msg.delete();
+            })).then(
+                 interaction.reply(
+                    {content: `${currentChannel} has been cleared!`, ephemeral: true}
+        ))
         // interaction.guild.channels.fetch()
         // .then(channels => channels.each);
         // await interaction.reply(
