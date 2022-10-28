@@ -14,10 +14,6 @@ const client = new Client({
   ],
 }); // create new client
 
-client.once('ready', () => {
-  console.log(`Sirene is live!`);
-});
-
 // Loading Command Files
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
@@ -38,35 +34,36 @@ for (const file of commandFiles) {
   }
 }
 
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs
+  .readdirSync(eventsPath)
+  .filter((file) => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+  const filePath = path.join(eventsPath, file);
+  const event = require(filePath);
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
+  }
+}
+// client.once(Events.ClientReady, (c) => {
+//   console.log(`${c.user.username} is live!`);
+// });
+
 // Init Slash Commands
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+// client.on(Events.InteractionCreate, async (interaction) => {
 
-  const command = interaction.client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.error(`No command matching ${interaction.commandName} was found`);
-    return;
-  }
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({
-      content: 'There was an error while executing this command!',
-      ephemeral: true,
-    });
-  }
-});
+// });
 // End Loading Commands
 
-client.on('messageCreate', (message) => {
-  if (message.author.bot) return;
-  if (message.channel.name == 'bow') {
-    return message.reply(`hello! and welcome to the ${message.channel}`);
-  }
-});
+// client.on('messageCreate', (message) => {
+//   if (message.author.bot) return;
+//   if (message.channel.name == 'bow') {
+//     return message.reply(`hello! and welcome to the ${message.channel}`);
+//   }
+// });
 
 //this has to be the last line
 client.login(token); //login bot using token
